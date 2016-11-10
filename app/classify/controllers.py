@@ -61,7 +61,7 @@ def publication(pmid):
             result = {'title': 'Warning', 'message': message}
             return render_template('error.html', result=result)
 
-        return redirect(url_for('classify.next'))
+        return redirect(url_for('classify.random'))
 
 
 @classify.route('/random')
