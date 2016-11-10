@@ -42,7 +42,7 @@ def publication(pmid):
 
         numSentences = int(request.form['numSentences'])
         fullTextViewed = request.form['fullTextViewed']
-        print(list(request.form.items()))
+
         for i in range(numSentences):
             isAvailable = False
             if str(i) in dict(request.form.items()):
