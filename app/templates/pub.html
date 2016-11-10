@@ -1,0 +1,100 @@
+<html>
+
+    <head>
+        <title> {{ result['pmid'] }}</title>
+        <script src="https://code.jquery.com/jquery-3.1.1.min.js"
+                integrity="sha256-hVVnYaiADRTO2PzUGmuLJr8BLUSjGIZsDYGmIJLv2b8=" crossorigin="anonymous"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/mark.js/8.4.0/jquery.mark.min.js"></script>
+        <script>
+            $(document).ready(function(){
+                $('body').on('mouseup', function () {
+                    console.log(1);
+                    var highlightedText = window.getSelection().toString();
+                    if(highlightedText!=''){
+                        $('#name').val(highlightedText);
+                    }
+                });
+
+                $('#doi').click(function () {
+                    $('#fullTextViewed').val(true);
+                });
+
+                $('#radio_tool').click(function () {
+                    $('#submit').prop('disabled', false);
+                });
+                $('#radio_nontool').click(function () {
+                    $('#submit').prop('disabled', false);
+                });
+                $('#radio_amb').click(function () {
+                    $('#submit').prop('disabled', false);
+                });
+
+                var regex = /[-a-zA-Z0-9@:%_\+.~#?&\/\/=]{2,256}\.[a-z]{2,4}\b(\/[-a-zA-Z0-9@:%_\+.~#?&\/\/=]*)?/gi;
+                $("#abstract").markRegExp(regex);
+                $(".sentence").markRegExp(regex);
+                $(".link-highlight").mark("supplement", {
+                    "element": "span",
+                    "className": "supplement"
+                });
+                $(".link-highlight").mark("supplementary software", {
+                    "element": "span",
+                    "className": "supplement",
+                    "separateWordSearch": false
+                });
+                $(".link-highlight").mark("additional file", {
+                    "element": "span",
+                    "className": "additional",
+                    "separateWordSearch": false
+                });
+                $(".link-highlight").mark("cran bioconductor github sourceforge bitbucket google matlab python perl c++", {
+                    "element": "span",
+                    "className": "keywords"
+                });
+            })
+        </script>
+        <style>
+            .supplement{
+                background: pink;
+            }
+            .additional{
+                background: lightskyblue;
+            }
+            .keywords{
+                background: orangered;
+            }
+        </style>
+    </head>
+
+    <body>
+        <h1>{{ result['title'] }}
+        {% if result['isTool'] is none %}
+            [Not Classified]
+        {%  elif result['isTool'] %}
+            [Tool]
+        {% else %}
+            [Non Tool]
+        {% endif %}
+        </h1>
+        <h2>Abstract:</h2>
+        <p id="abstract" class="link-highlight">{{ result['abstract'] }}
+            <a id='doi' href="http://doi.org/{{ result['doi'] }}" target="_blank">http://doi.org/{{ result['doi'] }}</a></p></br>
+        <form method="post" action="">
+            <input type="hidden" name="numSentences" value={{ result['sentences']|length }}></input>
+            <input type="hidden" id="fullTextViewed" name="fullTextViewed" value=false></input>
+            <input type="radio" id="radio_tool" name="isTool" value="Tool" {% if not result['ambiguous'] and result['isTool'] %}checked{% endif %}>Tool</input>
+            <input type="radio" id="radio_nontool" name="isTool" value="Nontool" {% if not result['ambiguous'] and result['isTool'] is not none and not result['isTool'] %}checked{% endif %}>Not a tool</input>
+            <input type="radio" id="radio_amb" name="isTool" value="Ambigiuous" {% if result['ambiguous'] %}checked{% endif %}>Ambiguous</input></br></br>
+            <span>Name</span>
+            <input type="text" id="name" name="name" value={{ result['name'] or "" }}></input></br></br>
+            <span>Is this sentence helpful?</span></br></br>
+            {% if result['sentences'] %}
+                {% for sentence in result['sentences'] %}
+                    <input type="checkbox" name="{{ loop.index0 }}" {% if sentence['available'] %}checked{% endif %}><span class="sentence link-highlight">{{ sentence['sentence'] }} </span></input></br>
+                {% endfor %}
+            {% endif %}
+            </br>
+            <input id="submit" type="submit" value="submit" {% if not result['ambiguous'] and result['isTool'] is none %}disabled{% endif %}></input></br></br>
+            <a href="/classify/next">Skip</a>
+        </form>
+    </body>
+</html>
