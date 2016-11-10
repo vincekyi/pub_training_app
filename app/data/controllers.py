@@ -1,6 +1,8 @@
 from flask import Blueprint, jsonify, request
 from flask import current_app as app
 
+import logging
+
 
 data = Blueprint('data', __name__)
 
@@ -70,7 +72,8 @@ def index():
 def getPub(pmid):
     mongo = app.database
     obj = mongo.sentence.find_one({'pmid':pmid})
-    if not obj.acknowledged:
+    if not obj:
+        logging.warning('Data: publication not found')
         return jsonify({'status': 'error',
                         'message': 'Publication not found'})
     obj.pop('_id')
@@ -115,8 +118,10 @@ def getAllImpSentences(pubtype):
     mongo = app.database
     obj = mongo.sentence.find(query, options)
     if not obj:
+        message = 'Data: Could not retrieve publications'
+        logging.warning(message)
         return jsonify({'status': 'error',
-                        'message': 'Could not retrieve all important sentences'})
+                        'message': message})
     results = []
     for entry in obj:
         entry.pop('_id')

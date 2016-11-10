@@ -6,7 +6,7 @@ import sys
 
 def main(argv):
 
-    port = 5000
+    port = 8000
     debug = True
     if len(argv) > 1:
         port = argv[0]
