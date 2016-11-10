@@ -64,8 +64,8 @@ def publication(pmid):
         return redirect(url_for('classify.next'))
 
 
-@classify.route('/next')
-def next():
+@classify.route('/random')
+def random():
     mongo = app.database
     numNotClassified = mongo.sentence.count({'classified': False})
     found = mongo.sentence.find_one({'classified': False}, {'pmid': 1}, skip=randint(0, numNotClassified-1))
